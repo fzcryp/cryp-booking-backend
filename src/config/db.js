@@ -1,10 +1,11 @@
 import mysql from "mysql2";
 
 const db = mysql.createConnection({
-  host: "localhost", // XAMPP MySQL host
-  user: "root", // default user for XAMPP
-  password: "", // leave empty unless you set one
-  database: "cryp_booking", // your DB name
+  host: "premium704.web-hosting.com", // XAMPP MySQL host
+  user: "crypenxz_hemdip", // default user for XAMPP
+  password: "Hemdip@payval7108", // leave empty unless you set one
+  database: "crypenxz_cryp_booking", // your DB name
+  port: 3306,
 });
 
 db.connect((err) => {
