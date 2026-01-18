@@ -43,14 +43,7 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(express.json());
 
-// Database connection check
-db.connect((err) => {
-  if (err) {
-    console.error("❌ Database connection failed:", err);
-  } else {
-    console.log("✅ Connected to MySQL database.");
-  }
-});
+// Database connection check handled in db.js
 async function getAccessToken() {
     const now = Date.now();
     if (accessToken && now < tokenExpiresAt) {
