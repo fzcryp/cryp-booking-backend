@@ -6,25 +6,25 @@ import {
   creditUserBalance,
 } from "../models/user.js";
 import { saveWithdrawalTransaction } from "../models/transaction.js";
+import { verifyToken } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-// load env
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
-const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
-const PAYPAL_API = process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com"; // sandbox default
+// load env happens at runtime now to ensure dotenv is loaded
+// const PAYPAL_API = process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com"; 
 
-if (!PAYPAL_CLIENT_ID || !PAYPAL_SECRET) {
-  console.warn(
-    "⚠️ PayPal credentials not set (PAYPAL_CLIENT_ID, PAYPAL_SECRET). Withdraw route will fail until set."
-  );
-}
+// Helper to get fresh env vars
+const getPayPalConfig = () => ({
+  clientId: process.env.PAYPAL_CLIENT_ID,
+  secret: process.env.PAYPAL_SECRET,
+  api: process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com"
+});
 
 /**
  * POST /api/withdraw
  * body: { user_email, amount, paypal_email }
  */
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
   try {
     const { user_email, amount, paypal_email } = req.body;
 
@@ -183,15 +183,16 @@ function generateId(prefix = "TX") {
 }
 
 // Get OAuth token from PayPal
+// Get OAuth token from PayPal
 async function getPayPalAccessToken() {
-  if (!PAYPAL_CLIENT_ID || !PAYPAL_SECRET) {
+  const { clientId, secret, api } = getPayPalConfig();
+  
+  if (!clientId || !secret) {
     throw new Error("PayPal credentials not configured in env");
   }
 
-  const creds = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString(
-    "base64"
-  );
-  const tokenUrl = `${PAYPAL_API}/v1/oauth2/token`;
+  const creds = Buffer.from(`${clientId}:${secret}`).toString("base64");
+  const tokenUrl = `${api}/v1/oauth2/token`;
   const res = await fetch(tokenUrl, {
     method: "POST",
     headers: {
@@ -211,7 +212,8 @@ async function getPayPalAccessToken() {
 
 // Create a single payout (simple example using single item)
 async function createPayPalPayout(accessToken, amount, receiverEmail) {
-  const url = `${PAYPAL_API}/v1/payments/payouts`;
+  const { api } = getPayPalConfig();
+  const url = `${api}/v1/payments/payouts`;
 
   // Unique sender_batch_id
   const batchId = `batch_${Date.now()}_${Math.floor(Math.random() * 10000)}`;

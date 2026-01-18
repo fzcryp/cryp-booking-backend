@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS saved_hotels (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_email VARCHAR(255) NOT NULL,
+  hotel_id VARCHAR(255) NOT NULL,
+  hotel_name VARCHAR(255) NOT NULL,
+  hotel_data JSON,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_email) REFERENCES users(email) ON DELETE CASCADE
+);

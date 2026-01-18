@@ -90,4 +90,53 @@ router.get("/profile/:id", (req, res) => {
     });
   });
 });
+// ✅ ADMIN: Get All Users
+import { getAllUsers, updateUser, deleteUser, deleteUsers } from "../models/user.js";
+
+router.get("/admin/all", (req, res) => {
+  getAllUsers((err, results) => {
+    if (err) {
+      console.error("❌ Error fetching all users:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.json(results);
+  });
+});
+
+// ✅ ADMIN: Update User
+router.put("/admin/:id", (req, res) => {
+  const { id } = req.params;
+  updateUser(id, req.body, (err, result) => {
+    if (err) {
+      console.error("❌ Error updating user:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.json({ message: "User updated successfully" });
+  });
+});
+
+// ✅ ADMIN: Delete User
+router.delete("/admin/:id", (req, res) => {
+  const { id } = req.params;
+  deleteUser(id, (err, result) => {
+    if (err) {
+      console.error("❌ Error deleting user:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.json({ message: "User deleted successfully" });
+  });
+});
+
+// ✅ ADMIN: Bulk Delete
+router.post("/admin/delete-bulk", (req, res) => {
+  const { ids } = req.body;
+  deleteUsers(ids, (err, result) => {
+    if (err) {
+      console.error("❌ Error bulk deleting users:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.json({ message: "Users deleted successfully" });
+  });
+});
+
 export default router;

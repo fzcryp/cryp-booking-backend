@@ -35,57 +35,6 @@ export const getPayPalAccessToken = async () => {
 };
 
 // ✅ Route: Process Withdrawal Request
-router.post("/withdraw", async (req, res) => {
-  const { email, finalAmount } = req.body;
-
-  try {
-    const accessToken = await getPayPalAccessToken();
-
-    const payoutBody = {
-      sender_batch_header: {
-        sender_batch_id: `batch_${Date.now()}`,
-        email_subject: "You have a payout!",
-        email_message: "You have received a payout from CrypBooking.",
-      },
-      items: [
-        {
-          recipient_type: "EMAIL",
-          amount: {
-            value: finalAmount.toFixed(2),
-            currency: "USD",
-          },
-          receiver: email,
-          note: "Thank you for using CrypBooking.",
-          sender_item_id: `item_${Date.now()}`,
-        },
-      ],
-    };
-
-    const response = await axios.post(
-      `${process.env.PAYPAL_API}/v1/payments/payouts`,
-      payoutBody,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    res.json({
-      message: "Withdrawal processed successfully",
-      paypalResponse: response.data,
-    });
-  } catch (error) {
-    console.error(
-      "❌ PayPal Withdrawal Error:",
-      error.response?.data || error.message
-    );
-    res.status(500).json({
-      error: "Withdrawal failed",
-      details: error.response?.data || error.message,
-    });
-  }
-});
+// ❌ REMOVED: Insecure withdrawal route. Use /api/withdraw instead.
 
 export default router;
