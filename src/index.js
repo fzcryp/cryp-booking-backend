@@ -34,14 +34,39 @@ let accessToken = null;
 let tokenExpiresAt = 0;
 
 // Middleware
+const allowedOrigins = [
+  "http://localhost:4200", 
+  "http://localhost:5000", 
+  "http://localhost:8100",
+  "https://www.pbookings.com", 
+  "https://pbookings.com"
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL ? [process.env.CLIENT_URL] : ["https://www.pbookings.com", "https://pbookings.com", "http://localhost:4200", "http://localhost:5000", "http://localhost:8100", "http://192.168.43.156:4200"],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log("Blocked by CORS:", origin);
+      callback(null, true); // Temporarily true for debugging
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization", "x-access-token"]
 }));
+
+// Enable pre-flight - using regex to avoid Express 5/path-to-regexp error
+app.options(/.*/, cors());
+
 app.use(bodyParser.json());
 app.use(express.json());
+
+// Request logger
+app.use((req, res, next) => {
+  console.log(`📢 ${req.method} ${req.url} from Origin: ${req.headers.origin}`);
+  next();
+});
 
 // Database connection check handled in db.js
 async function getAccessToken() {
